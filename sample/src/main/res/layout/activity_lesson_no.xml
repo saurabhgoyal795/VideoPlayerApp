@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:text="LessonNo : 1"
+        android:textSize="20sp"
+        android:padding="8dp"
+        android:id="@+id/lessonno"
+        android:layout_gravity="center_horizontal"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:text="LessonName"
+        android:textSize="18sp"
+        android:id="@+id/lessonname"
+        android:padding="8dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:id="@+id/lessonLayout"
+        android:layout_height="wrap_content">
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:padding="16dp"
+        android:hint="Enter Lesson No"
+        android:id="@+id/lessonNoEditText"
+        android:layout_height="wrap_content" />
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/submit"
+            android:text="Ok"/>
+    </LinearLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/my_recycler_view"
+        android:scrollbars="vertical"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"/>
+</LinearLayout>
+
