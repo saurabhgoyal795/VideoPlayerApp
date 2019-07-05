@@ -256,28 +256,22 @@ public class LessonNoActivity extends AppCompatActivity {
         super.onActivityResult(requestCode,resultCode,data);
         Log.d("ActivityResult", "hi i am called requestCode: "+requestCode + " resultCode: "+resultCode);
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-            try {
-                JSONObject obj = list.get(adapter.getCurrentPosition());
-               String filename = obj.getString("filename");
-                String filePath = BaseCameraActivity.getVideoFilePath(lessonNo,filename);
-                File file = new File(filePath);
-                if (file.exists()){
-                    obj.put("fileExist", true);
-                    list.set(adapter.getCurrentPosition(), obj);
-                    setList();
-//                    Intent intent = new Intent(getApplicationContext(), PortrateActivity.class);
-//                    intent.putExtra("listObject", list.get(adapter.getCurrentPosition() + 1).toString());
-//                    intent.putExtra("lessonNo", lessonNo);
-//                    new Handler().postDelayed(new Runnable() {
-//                        public void run() {
-//                            startActivityForResult(intent, 1);
-//                        }
-//                    }, 1000);
+                for (int i = 0; i < list.size(); i++) {
+                    JSONObject obj = list.get(i);
+                    String filename = null;
+                    try {
+                        filename = obj.getString("filename");
+                        String filePath = BaseCameraActivity.getVideoFilePath(lessonNo, filename);
+                        File file = new File(filePath);
+                        if (file.exists()) {
+                            obj.put("fileExist", true);
+                            list.set(i, obj);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
+                setList();
         }
     }
     class LessonListItemAdataper extends RecyclerView.Adapter<LessonListItemAdataper.LessonViewHolder> {

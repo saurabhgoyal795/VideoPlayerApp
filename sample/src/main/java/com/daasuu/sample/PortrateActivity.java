@@ -207,16 +207,21 @@ public class PortrateActivity extends AppCompatActivity {
             if (CommonUtility.isActivityDestroyed(PortrateActivity.this)) {
                 return;
             }
-            if (recordBtn.getText().equals(getString(R.string.app_record))) {
-                list.smoothScrollToPositionFromTop(1,0, speedControlSize * 1000);
-                filepath = getVideoFilePath(lessonNo,fileName);
-                cameraRecorder.start(filepath);
-                recordBtn.setText("Stop");
-            } else {
-                toGoToNext = false;
-                cameraRecorder.stop();
-                recordBtn.setText(getString(R.string.app_record));
+            try{
+                if (recordBtn.getText().equals(getString(R.string.app_record))) {
+                    list.smoothScrollToPositionFromTop(1,0, speedControlSize * 1000);
+                    filepath = getVideoFilePath(lessonNo,fileName);
+                    cameraRecorder.start(filepath);
+                    recordBtn.setText("Stop");
+                } else {
+                    toGoToNext = false;
+                    recordBtn.setText(getString(R.string.app_record));
+                    cameraRecorder.stop();
+                }
+            } catch ( Exception e){
+
             }
+
 
         });
 
@@ -466,7 +471,7 @@ public class PortrateActivity extends AppCompatActivity {
             jsonObj = jsonArray.getJSONObject(position);
             fileName = jsonObj.getString("filename");
             data = jsonObj.getString("data");
-            Toast.makeText(PortrateActivity.this,"Recoding will start in 5 sec", Toast.LENGTH_LONG).show();
+            Toast.makeText(PortrateActivity.this,"Recoding will start in 5 sec", Toast.LENGTH_SHORT).show();
             ArrayList<String> items = new ArrayList<>();
             items.add(data);
             items.add("");
@@ -474,6 +479,11 @@ public class PortrateActivity extends AppCompatActivity {
             if (adapter != null){
                 adapter.refreshAdapter(items);
             }
+            new Handler().postDelayed(new Runnable() {
+                public void run() {
+                    Toast.makeText(PortrateActivity.this,"Recoding will start in 1 sec", Toast.LENGTH_SHORT).show();
+                }
+            }, 3000);
 
             new Handler().postDelayed(new Runnable() {
                 public void run() {
