@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.animation.LinearInterpolator;
 import android.widget.Scroller;
 import android.widget.TextView;
@@ -21,6 +22,7 @@ public class ScrollTextView extends android.support.v7.widget.AppCompatTextView 
 
     // whether it's being paused
     private boolean mPaused = true;
+    int lineCount = 0;
 
     /*
      * constructor
@@ -58,17 +60,22 @@ public class ScrollTextView extends android.support.v7.widget.AppCompatTextView 
     /**
      * begin to scroll the text from the original position
      */
-    public void startScroll(Boolean flag) {
+    public void startScroll(Boolean flag , int lineCount) {
+        this.lineCount = lineCount;
         // begin from the very right side
         if (flag == true) {
             mRndDuration = 10000;
         } else {
-            mRndDuration = 100;
+            mRndDuration = 10;
         }
         mYPaused = -1 * getHeight();
         // assume it's paused
         mPaused = true;
-        resumeScroll();
+        if (lineCount < 8 ) {
+            setVisibility(VISIBLE);
+        } else {
+            resumeScroll();
+        }
     }
 
     /**
@@ -87,7 +94,9 @@ public class ScrollTextView extends android.support.v7.widget.AppCompatTextView 
         setScroller(mSlr);
 
         int scrollingLen = calculateScrollingLen();
-        int distance = scrollingLen - (getHeight() + mYPaused);
+        int distance =  scrollingLen - ( mYPaused);
+
+//        int distance = scrollingLen - (getHeight() + mYPaused);
         int duration = (new Double(mRndDuration * distance * 1.00000
                 / scrollingLen)).intValue();
         setVisibility(VISIBLE);
@@ -142,7 +151,7 @@ public class ScrollTextView extends android.support.v7.widget.AppCompatTextView 
 
         if (mSlr.isFinished() && (!mPaused)) {
             int finalY = mSlr.getFinalY();
-            this.startScroll(true);
+//            this.startScroll(true, lineCount);
         }
     }
 

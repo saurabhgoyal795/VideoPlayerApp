@@ -1,6 +1,7 @@
 package com.daasuu.sample.widget;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -25,5 +26,6 @@ public class PortraitFrameLayout extends FrameLayout {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int width = getMeasuredWidth();
         setMeasuredDimension(width, width / 9 * 16);
+
     }
 }

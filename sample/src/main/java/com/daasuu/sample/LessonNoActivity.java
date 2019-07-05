@@ -1,13 +1,18 @@
 package com.daasuu.sample;
 
+import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -94,7 +99,40 @@ public class LessonNoActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(mLayoutManager);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(event, new IntentFilter(LESSON_LIST_REFRESH));
         getList();
+        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
 
+            ActivityCompat.requestPermissions(LessonNoActivity.this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    1);
+        }
+
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        if (requestCode == 1) {
+            if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(LessonNoActivity.this,
+                        new String[]{Manifest.permission.CAMERA},
+                        2);
+            }
+        } else if (requestCode == 2) {
+            if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(LessonNoActivity.this,
+                        new String[]{Manifest.permission.RECORD_AUDIO},
+                        3);
+            }
+        }
     }
 
     @Override
@@ -216,6 +254,7 @@ public class LessonNoActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         super.onActivityResult(requestCode,resultCode,data);
+        Log.d("ActivityResult", "hi i am called requestCode: "+requestCode + " resultCode: "+resultCode);
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
             try {
                 JSONObject obj = list.get(adapter.getCurrentPosition());
@@ -226,6 +265,14 @@ public class LessonNoActivity extends AppCompatActivity {
                     obj.put("fileExist", true);
                     list.set(adapter.getCurrentPosition(), obj);
                     setList();
+//                    Intent intent = new Intent(getApplicationContext(), PortrateActivity.class);
+//                    intent.putExtra("listObject", list.get(adapter.getCurrentPosition() + 1).toString());
+//                    intent.putExtra("lessonNo", lessonNo);
+//                    new Handler().postDelayed(new Runnable() {
+//                        public void run() {
+//                            startActivityForResult(intent, 1);
+//                        }
+//                    }, 1000);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -316,8 +363,9 @@ public class LessonNoActivity extends AppCompatActivity {
                 public void onClick(View view) {
                     currentPosition = pos;
                     Intent intent = new Intent(context, PortrateActivity.class);
-                    intent.putExtra("listObject", items.get(pos).toString());
+                    intent.putExtra("listObject", items.toString());
                     intent.putExtra("lessonNo", lesssonNo);
+                    intent.putExtra("pos", pos);
                     startActivityForResult(intent, 1);
                 }
             };

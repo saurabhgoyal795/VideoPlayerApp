@@ -1,6 +1,5 @@
 package com.daasuu.sample;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -50,8 +49,8 @@ public class BaseCameraActivity extends AppCompatActivity {
 
     private SampleGLView sampleGLView;
     protected CameraRecorder cameraRecorder;
-    protected String filepath;
-    protected TextView recordBtn;
+    private String filepath;
+    private TextView recordBtn;
     protected LensFacing lensFacing = LensFacing.FRONT;
     protected int cameraWidth = 1280;
     protected int cameraHeight = 720;
@@ -67,11 +66,22 @@ public class BaseCameraActivity extends AppCompatActivity {
 
         this.lessonNo = lessonNo;
         recordBtn = findViewById(R.id.btn_record);
+        recordBtn.setOnClickListener(v -> {
 
-        ScrollTextView text = findViewById(R.id.data);
-        text.setText(Html.fromHtml(data));
-        text.startScroll(false);
-        text.setMovementMethod(new ScrollingMovementMethod());
+            if (recordBtn.getText().equals(getString(R.string.app_record))) {
+                filepath = getVideoFilePath(lessonNo,fileName);
+                cameraRecorder.start(filepath);
+                recordBtn.setText("Stop");
+            } else {
+                cameraRecorder.stop();
+                recordBtn.setText(getString(R.string.app_record));
+            }
+
+        });
+//        ScrollTextView text = findViewById(R.id.data);
+//        text.setText(Html.fromHtml(data));
+//        text.startScroll(false);
+//        text.setMovementMethod(new ScrollingMovementMethod());
 
         findViewById(R.id.btn_flash).setOnClickListener(v -> {
             if (cameraRecorder != null && cameraRecorder.isFlashSupport()) {
@@ -127,6 +137,51 @@ public class BaseCameraActivity extends AppCompatActivity {
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+
+//         Extra code
+
+
+        //        scrollTextView = findViewById(R.id.data);
+//        normalTextView = findViewById(R.id.normalTextView);
+//        normalTextView.setMovementMethod(new ScrollingMovementMethod());
+//        normalTextView.setText(Html.fromHtml(data));
+//        normalTextView.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                int lineCount = normalTextView.getLineCount();
+//
+//                if (lineCount < 3) {
+//                    normalTextView.setTextSize(38);
+//                } else if (lineCount < 4 && lineCount > 2) {
+//                    normalTextView.setTextSize(34);
+//                } else if ( lineCount > 4  && lineCount < 7) {
+//                    normalTextView.setTextSize(30);
+//                } else {
+//                    normalTextView.setTextSize(28);
+//                }
+//                int textViewHeight = (lineCount + 1) * normalTextView.getLineHeight();
+//
+//                if (lineCount >= 8) {
+//                    int height = normalTextView.getHeight();
+//                    ((FrameLayout)(normalTextView.getParent())).getLayoutParams().height = (int)(250*density_global);
+//                    startScrollAnimation(textViewHeight);
+//                }
+//
+//            }
+//        },50);
+//        scrollTextView.setText(Html.fromHtml(data));
+//        scrollTextView.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                int lineCount = scrollTextView.getLineCount();
+//
+////                scrollTextView.startScroll(false, lineCount);
+//
+//                Log.d("TextViewLineCount", "linecOUNT: "+ lineCount);
+//            }
+//        });
+
+
     }
 
     @Override
@@ -140,7 +195,6 @@ public class BaseCameraActivity extends AppCompatActivity {
         super.onStop();
         releaseCamera();
     }
-
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
