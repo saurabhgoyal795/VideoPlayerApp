@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,6 +42,7 @@ import com.daasuu.camerarecorder.CameraRecordListener;
 import com.daasuu.camerarecorder.CameraRecorder;
 import com.daasuu.camerarecorder.CameraRecorderBuilder;
 import com.daasuu.camerarecorder.LensFacing;
+import com.daasuu.sample.widget.CommonUtility;
 import com.daasuu.sample.widget.Filters;
 import com.daasuu.sample.widget.SampleGLView;
 import com.daasuu.sample.widget.ScrollTextView;
@@ -77,9 +79,11 @@ public class PortrateActivity extends AppCompatActivity {
     TextView textSizeText;
     TextView speedControlText;
     ImageView playButton;
+    Button nextButton;
     SeekBar seekbar;
     SeekBar speedControlSeekBar;
     TextView normalTextView;
+    MyListAdapter adapter;
     ListView list;
     protected LensFacing lensFacing = LensFacing.FRONT;
     protected int cameraWidth = 1280;
@@ -97,7 +101,7 @@ public class PortrateActivity extends AppCompatActivity {
     int speedControlSize = 10;
     int max2 = 30;
     int min2 = 5;
-
+    boolean toGoToNext = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,12 +130,26 @@ public class PortrateActivity extends AppCompatActivity {
         textSizeText= findViewById(R.id.textSizeText);
         speedControlSeekBar = findViewById(R.id.speedSeekBar);
         speedControlText = findViewById(R.id.speedControlText);
-        playButton = findViewById(R.id.playButton);
+        nextButton = findViewById(R.id.nextButtonNew);
+        playButton = findViewById(R.id.playButtonNew);
+
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 list.smoothScrollToPositionFromTop(1,0, speedControlSize * 1000);
                 playButton.setVisibility(View.GONE);
+            }
+        });
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(recordBtn.getText().toString().trim().equalsIgnoreCase("stop")) {
+                    toGoToNext = true;
+                    cameraRecorder.stop();
+                } else {
+                    goToNextQuestion();
+                }
+
             }
         });
         findViewById(R.id.btn_flash).setOnClickListener(v -> {
@@ -186,13 +204,16 @@ public class PortrateActivity extends AppCompatActivity {
         cameraWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         cameraHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
         recordBtn.setOnClickListener(v -> {
-
+            if (CommonUtility.isActivityDestroyed(PortrateActivity.this)) {
+                return;
+            }
             if (recordBtn.getText().equals(getString(R.string.app_record))) {
                 list.smoothScrollToPositionFromTop(1,0, speedControlSize * 1000);
                 filepath = getVideoFilePath(lessonNo,fileName);
                 cameraRecorder.start(filepath);
                 recordBtn.setText("Stop");
             } else {
+                toGoToNext = false;
                 cameraRecorder.stop();
                 recordBtn.setText(getString(R.string.app_record));
             }
@@ -204,7 +225,7 @@ public class PortrateActivity extends AppCompatActivity {
         items.add(data);
         items.add("");
 
-        MyListAdapter adapter=new MyListAdapter(this, items);
+        adapter=new MyListAdapter(this, items);
         list=(ListView)findViewById(R.id.list);
 
         list.setOnTouchListener(new View.OnTouchListener() {
@@ -226,8 +247,8 @@ public class PortrateActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             public void run() {
                 list.setAdapter(adapter);
-                }
-             }, 500);
+            }
+        }, 500);
         seekbar.setMax(max - min);
         seekbar.setProgress(textSize -min);
         speedControlSeekBar.setMax(max2 - min2);
@@ -340,14 +361,14 @@ public class PortrateActivity extends AppCompatActivity {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 if (action == KeyEvent.ACTION_DOWN) {
                     Log.i("VOL_UP_pressed", String.valueOf(event.getKeyCode()));
-                    Toast.makeText(getApplication(), "IOS button clicked", Toast.LENGTH_SHORT).show();
+                    goToNextQuestion();
                 }
                 return true;
 
             case KeyEvent.KEYCODE_ENTER:
                 if(action==KeyEvent.ACTION_DOWN){
                     Log.i("ENTER_pressed", String.valueOf(event.getKeyCode()));
-                    Toast.makeText(getApplication(), "ANDROID button clicked", Toast.LENGTH_SHORT).show();
+                    goToNextQuestion();
                 }
             default:
                 return super.dispatchKeyEvent(event);
@@ -405,23 +426,9 @@ public class PortrateActivity extends AppCompatActivity {
                     @Override
                     public void onRecordComplete() {
                         exportMp4ToGallery(getApplicationContext(), filepath);
-                        try {
-                            jsonArray = new JSONArray(getIntent().getStringExtra("listObject"));
-                            jsonObj = jsonArray.getJSONObject(position + 1);
-                            fileName = jsonObj.getString("filename");
-                            data = jsonObj.getString("data");
-//                            Toast.makeText(PortrateActivity.this,"Recoding will start in 5 sec", Toast.LENGTH_LONG).show();
-//
-//                            new Handler().postDelayed(new Runnable() {
-//                                public void run() {
-//                                    recordBtn.performClick();
-//                                }
-//                            }, 5000);
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        if (toGoToNext == true) {
+                            goToNextQuestion();
                         }
-//                        onBackPressed();
 
                     }
 
@@ -451,6 +458,34 @@ public class PortrateActivity extends AppCompatActivity {
                 .build();
 
 
+    }
+
+    void goToNextQuestion() {
+        try {
+            position = position + 1;
+            jsonObj = jsonArray.getJSONObject(position);
+            fileName = jsonObj.getString("filename");
+            data = jsonObj.getString("data");
+            Toast.makeText(PortrateActivity.this,"Recoding will start in 5 sec", Toast.LENGTH_LONG).show();
+            ArrayList<String> items = new ArrayList<>();
+            items.add(data);
+            items.add("");
+            recordBtn.setText(R.string.app_record);
+            if (adapter != null){
+                adapter.refreshAdapter(items);
+            }
+
+            new Handler().postDelayed(new Runnable() {
+                public void run() {
+                    recordBtn.performClick();
+                }
+            }, 5000);
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void changeFilter(Filters filters) {
@@ -546,7 +581,7 @@ public class PortrateActivity extends AppCompatActivity {
     public class MyListAdapter extends ArrayAdapter<String> {
 
         private final Activity context;
-        private final ArrayList<String> dataarray;
+        private ArrayList<String> dataarray;
 
         public MyListAdapter(Activity context, ArrayList<String> dataarray) {
             super(context,R.layout.item,dataarray);
@@ -576,6 +611,11 @@ public class PortrateActivity extends AppCompatActivity {
         }
 
         public void refreshAdapter() {
+            notifyDataSetChanged();
+        }
+
+        public void refreshAdapter(ArrayList<String> itm) {
+            this.dataarray = itm;
             notifyDataSetChanged();
         }
     }

@@ -1,8 +1,10 @@
 package com.daasuu.sample.widget;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.util.Log;
 
 import org.json.JSONObject;
@@ -326,6 +328,22 @@ public class CommonUtility {
         dataString = "<span>"+dataString+"</span>";
         return dataString;
 
+    }
+
+    public static boolean isActivityDestroyed(Activity context) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                if (context == null || context.isDestroyed())
+                    return true;
+            }
+            if (context == null || context.isFinishing()) {
+                return true;
+            }
+        } catch (Throwable e) {
+
+            return true;
+        }
+        return false;
     }
 
 }
