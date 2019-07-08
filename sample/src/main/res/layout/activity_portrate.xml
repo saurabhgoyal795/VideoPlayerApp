@@ -153,6 +153,30 @@
         android:minHeight="6dp"
         android:layout_below="@+id/speedControlText"
         android:id="@+id/speedSeekBar"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/fileName"
+            android:text="jfffjfjfj"
+            android:textSize="18sp"
+            android:textColor="#ffffff"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_below="@id/speedSeekBar"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/timerCounter"
+            android:text="1"
+            android:textSize="90sp"
+            android:textColor="#ffffff"
+            android:gravity="center"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            />
+
     </RelativeLayout>
 
 

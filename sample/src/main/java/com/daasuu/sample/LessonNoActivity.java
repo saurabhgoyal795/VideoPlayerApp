@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -66,6 +67,10 @@ public class LessonNoActivity extends AppCompatActivity {
     EditText lessonNoEditText;
     TextView lessonTextView;
     JSONObject appStringObject;
+    boolean isFromSheet = false;
+    private Menu menu;
+    SharedPreferences prefs;
+
 
     private BroadcastReceiver event = new BroadcastReceiver() {
         @Override
@@ -98,7 +103,17 @@ public class LessonNoActivity extends AppCompatActivity {
         mLayoutManager = new GridLayoutManager(getApplicationContext(),1);
         mRecyclerView.setLayoutManager(mLayoutManager);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(event, new IntentFilter(LESSON_LIST_REFRESH));
+        prefs = this.getSharedPreferences(
+                "com.daasuu.sample", Context.MODE_PRIVATE);
+
+        if (prefs.getBoolean("googleSheet", false) == false){
+            isFromSheet = false;
+        } else {
+            isFromSheet = true;
+
+        }
         getList();
+
         if (ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -172,12 +187,22 @@ public class LessonNoActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
+        this.menu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_process_order, menu);
         return true;
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (prefs.getBoolean("googleSheet", false) == false){
+            menu.findItem(R.id.google_sheet).setTitle("Switch to sheet");
+        } else {
+            menu.findItem(R.id.google_sheet).setTitle("Switch to Database");
+        }
+        return super.onPrepareOptionsMenu(menu);
+
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -185,6 +210,17 @@ public class LessonNoActivity extends AppCompatActivity {
             case R.id.action_settings:
                 findViewById(R.id.lessonLayout).setVisibility(View.VISIBLE);
                 return true;
+            case R.id.google_sheet:
+                if (item.getTitle().toString().trim().equalsIgnoreCase("Switch to sheet")) {
+                    isFromSheet = true;
+                    prefs.edit().putBoolean("googleSheet", true).commit();
+                    item.setTitle("Switch to Database");
+                } else {
+                    isFromSheet = false;
+                    prefs.edit().putBoolean("googleSheet", false).commit();
+                    item.setTitle("Switch to sheet");
+                }
+                getList();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -215,15 +251,30 @@ public class LessonNoActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... voids) {
             try {
-                String response = ServerInterface.doSync("https://helloenglish.com/getAudioStrings.action?language=Hindi&lessonNumber="+(300+lessonNo)+"&lessonNumberVar=0");
+                String url = "https://helloenglish.com/getAudioStrings.action?language=Hindi&lessonNumber="+(300+lessonNo)+"&lessonNumberVar=0";
+                if (isFromSheet) {
+                    url = "http://mail.culturealley.com/english-app/utility/getLessonVideoData.php?lessonNumber="+lessonNo;
+                }
+                String response = ServerInterface.doSync(url);
                 try {
-                    JSONObject responseObject= new JSONObject(response);
-                    JSONArray dataArray=responseObject.getJSONArray("stringArray");
-                    lessonName = responseObject.getString("lessonName");
+                    JSONObject responseObject= null;
+                    JSONArray dataArray= null;
+                    if(isFromSheet) {
+                        dataArray= new JSONArray(response);
+                    } else {
+                        responseObject= new JSONObject(response);
+                        lessonName = responseObject.optString("lessonName");
+                        dataArray=responseObject.getJSONArray("stringArray");
+                    }
+
                     list = new ArrayList<>();
                     for (int i = 0; i<dataArray.length();i++){
                         JSONObject obj = dataArray.getJSONObject(i);
-                        obj.put("filename", obj.getString("filename").replaceAll(".mp3", "")+ ".mp4");
+                        if(obj.has("file_name")){
+                            obj.put("filename", obj.getString("file_name").replaceAll(".mp3", "")+ ".mp4");
+                        }else {
+                            obj.put("filename", obj.getString("filename").replaceAll(".mp3", "")+ ".mp4");
+                        }
                         String filename = obj.getString("filename");
                         String filePath = BaseCameraActivity.getVideoFilePath(lessonNo,filename);
                         File file = new File(filePath);
@@ -232,7 +283,11 @@ public class LessonNoActivity extends AppCompatActivity {
                         } else {
                             obj.put("fileExist", false);
                         }
-                        obj.put("data", CommonUtility.replaceVariable(obj.getString("data"),appStringObject));
+                        if (isFromSheet && obj.has("data_english")) {
+                            obj.put("data", CommonUtility.replaceVariable(obj.getString("data_english"),appStringObject));
+                        } else {
+                            obj.put("data", CommonUtility.replaceVariable(obj.getString("data"),appStringObject));
+                        }
                         list.add(obj);
                     }
                 } catch (JSONException e) {

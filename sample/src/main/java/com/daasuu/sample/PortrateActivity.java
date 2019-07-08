@@ -26,7 +26,10 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewManager;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -83,6 +86,8 @@ public class PortrateActivity extends AppCompatActivity {
     SeekBar seekbar;
     SeekBar speedControlSeekBar;
     TextView normalTextView;
+    TextView fileNameTextView;
+    TextView timerCounter;
     MyListAdapter adapter;
     ListView list;
     protected LensFacing lensFacing = LensFacing.FRONT;
@@ -132,6 +137,9 @@ public class PortrateActivity extends AppCompatActivity {
         speedControlText = findViewById(R.id.speedControlText);
         nextButton = findViewById(R.id.nextButtonNew);
         playButton = findViewById(R.id.playButtonNew);
+        fileNameTextView = findViewById(R.id.fileName);
+        timerCounter = findViewById(R.id.timerCounter);
+        fileNameTextView.setText(fileName);
 
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -471,7 +479,7 @@ public class PortrateActivity extends AppCompatActivity {
             jsonObj = jsonArray.getJSONObject(position);
             fileName = jsonObj.getString("filename");
             data = jsonObj.getString("data");
-            Toast.makeText(PortrateActivity.this,"Recoding will start in 5 sec", Toast.LENGTH_SHORT).show();
+            fileNameTextView.setText(fileName);
             ArrayList<String> items = new ArrayList<>();
             items.add(data);
             items.add("");
@@ -479,15 +487,9 @@ public class PortrateActivity extends AppCompatActivity {
             if (adapter != null){
                 adapter.refreshAdapter(items);
             }
+            scaleAnimation(5);
             new Handler().postDelayed(new Runnable() {
                 public void run() {
-                    Toast.makeText(PortrateActivity.this,"Recoding will start in 1 sec", Toast.LENGTH_SHORT).show();
-                }
-            }, 3000);
-
-            new Handler().postDelayed(new Runnable() {
-                public void run() {
-                    recordBtn.performClick();
                 }
             }, 5000);
 
@@ -496,6 +498,42 @@ public class PortrateActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    private void scaleAnimation(int counter) {
+        final int temp[] = {counter};
+        ScaleAnimation scale1 = new ScaleAnimation(0f, 1f, 0f, 1f, Animation.RELATIVE_TO_SELF,
+                0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        scale1.setDuration(1000);
+        timerCounter.setVisibility(View.VISIBLE);
+        timerCounter.startAnimation(scale1);
+        timerCounter.setText(""+ counter);
+        scale1.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                if(CommonUtility.isActivityDestroyed(PortrateActivity.this)) {
+                    return;
+                }
+                temp[0] -= 1;
+                Log.d("scaleAnimation: ", "counter"+temp[0]);
+                if (temp[0] < 1){
+                    timerCounter.setVisibility(View.GONE);
+                    timerCounter.clearAnimation();
+                    recordBtn.performClick();
+                } else {
+                    scaleAnimation(temp[0]);
+                }
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
     }
 
     private void changeFilter(Filters filters) {

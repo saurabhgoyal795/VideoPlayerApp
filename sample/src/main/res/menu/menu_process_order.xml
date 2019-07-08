@@ -6,4 +6,9 @@
         android:orderInCategory="100"
         android:title="Change lesson no"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/google_sheet"
+        android:orderInCategory="100"
+        android:title="Swith to sheet"
+        app:showAsAction="never" />
 </menu>
