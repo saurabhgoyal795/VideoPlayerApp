@@ -105,7 +105,7 @@ public class PortrateActivity extends AppCompatActivity {
     int min = 20;
     int textSize = 32;
     int speedControlSize = 15;
-    int max2 = 50;
+    int max2 = 40;
     int min2 = 5;
     boolean toGoToNext = false;
     SharedPreferences prefs;
@@ -249,6 +249,8 @@ public class PortrateActivity extends AppCompatActivity {
                         break;
                     case MotionEvent.ACTION_CANCEL:
                         break;
+                    case MotionEvent.ACTION_MOVE:
+
                 }
                 return false;
             }
