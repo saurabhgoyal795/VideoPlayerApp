@@ -67,6 +67,7 @@ public class LessonNoActivity extends AppCompatActivity {
     EditText lessonNoEditText;
     EditText changeSpeedEditText;
     TextView lessonTextView;
+    EditText changetimeEditText;
     JSONObject appStringObject;
     boolean isFromSheet = false;
     private Menu menu;
@@ -88,6 +89,7 @@ public class LessonNoActivity extends AppCompatActivity {
         lessonTextView.setText("Lesson No : "+lessonNo);
         lessonNoEditText = findViewById(R.id.lessonNoEditText);
         changeSpeedEditText = findViewById(R.id.changeSpeedEditText);
+        changetimeEditText = findViewById(R.id.changetimeEditText);
         lessonNameTextView = findViewById(R.id.lessonname);
         prefs = this.getSharedPreferences(
                 "com.daasuu.sample", Context.MODE_PRIVATE);
@@ -102,6 +104,7 @@ public class LessonNoActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                lessonNo=Integer.parseInt(lessonNoEditText.getText().toString().trim());
+                findViewById(R.id.lessonLayout).setVisibility(View.GONE);
                 getList();
             }
         });
@@ -112,6 +115,17 @@ public class LessonNoActivity extends AppCompatActivity {
                     prefs.edit().putInt("speedControl", Integer.parseInt(changeSpeedEditText.getText().toString().trim())).commit();
                     Toast.makeText(LessonNoActivity.this, "Speed Updated Successfully",Toast.LENGTH_SHORT).show();
                     findViewById(R.id.speedLayout).setVisibility(View.GONE);
+                }
+
+            }
+        });
+        findViewById(R.id.submitTimer).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (changetimeEditText.getText().toString().trim() != ""){
+                    prefs.edit().putInt("timerControl", Integer.parseInt(changetimeEditText.getText().toString().trim())).commit();
+                    Toast.makeText(LessonNoActivity.this, "Timer Updated Successfully",Toast.LENGTH_SHORT).show();
+                    findViewById(R.id.timerLayout).setVisibility(View.GONE);
                 }
 
             }
@@ -225,6 +239,9 @@ public class LessonNoActivity extends AppCompatActivity {
                 return true;
             case R.id.changeSpeed:
                 findViewById(R.id.speedLayout).setVisibility(View.VISIBLE);
+                return true;
+            case R.id.changeTimer:
+                findViewById(R.id.timerLayout).setVisibility(View.VISIBLE);
                 return true;
             case R.id.google_sheet:
                 if (item.getTitle().toString().trim().equalsIgnoreCase("Switch to sheet")) {

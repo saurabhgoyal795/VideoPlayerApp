@@ -86,9 +86,11 @@ public class PortrateActivity extends AppCompatActivity {
     Button nextButton;
     SeekBar seekbar;
     SeekBar speedControlSeekBar;
+    SeekBar timeSeekBar;
     TextView normalTextView;
     TextView fileNameTextView;
     TextView timerCounter;
+    TextView timeControlText;
     MyListAdapter adapter;
     ListView list;
     protected LensFacing lensFacing = LensFacing.FRONT;
@@ -104,11 +106,17 @@ public class PortrateActivity extends AppCompatActivity {
     int max = 60;
     int min = 20;
     int textSize = 32;
-    int speedControlSize = 15;
+    int speedControlSize = 20;
     int max2 = 40;
     int min2 = 5;
+    int timeControl = 5;
+    int max3 = 10;
+    int min3 = 1;
     boolean toGoToNext = false;
     SharedPreferences prefs;
+    ArrayList<Integer> points = new ArrayList<>();
+    boolean flagForAnimation = false;
+    boolean onAnimationStarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,15 +149,19 @@ public class PortrateActivity extends AppCompatActivity {
         playButton = findViewById(R.id.playButtonNew);
         fileNameTextView = findViewById(R.id.fileName);
         timerCounter = findViewById(R.id.timerCounter);
+        timeControlText = findViewById(R.id.timeControlText);
+        timeSeekBar = findViewById(R.id.timeSeekBar);
         fileNameTextView.setText(fileName);
         prefs = this.getSharedPreferences(
                 "com.daasuu.sample", Context.MODE_PRIVATE);
-        speedControlSize = prefs.getInt("speedControl", 15);
+        speedControlSize = prefs.getInt("speedControl", 20);
         speedControlText.setText("Speed: "+speedControlSize + "sec");
-
+        timeControl =  prefs.getInt("timerControl", 5);
+        timeControlText.setText("Time Control: "+timeControl + "sec");
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                onAnimationStarted = true;
                 list.smoothScrollToPositionFromTop(1,0, speedControlSize * 1000);
                 playButton.setVisibility(View.GONE);
             }
@@ -157,6 +169,7 @@ public class PortrateActivity extends AppCompatActivity {
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                onAnimationStarted = false;
                 if(recordBtn.getText().toString().trim().equalsIgnoreCase("stop")) {
                     toGoToNext = true;
                     cameraRecorder.stop();
@@ -222,7 +235,7 @@ public class PortrateActivity extends AppCompatActivity {
                 return;
             }
             if (recordBtn.getText().equals(getString(R.string.app_record))) {
-                scaleAnimation(5);
+                scaleAnimation(timeControl);
             } else {
                 toGoToNext = false;
                 recordBtn.setText(getString(R.string.app_record));
@@ -236,7 +249,6 @@ public class PortrateActivity extends AppCompatActivity {
 
         adapter=new MyListAdapter(this, items);
         list=(ListView)findViewById(R.id.list);
-
         list.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -245,11 +257,35 @@ public class PortrateActivity extends AppCompatActivity {
                     case MotionEvent.ACTION_DOWN:
                         break;
                     case MotionEvent.ACTION_UP:
-                        playButton.setVisibility(View.VISIBLE);
+                        Log.d("event Pressed",""+points);
+                        points = new ArrayList<>();
+                        if (flagForAnimation) {
+                            flagForAnimation = false;
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (onAnimationStarted){
+                                        playButton.setVisibility(View.GONE);
+                                        list.smoothScrollToPositionFromTop(1,0, speedControlSize * 1000);
+                                    } else {
+                                        playButton.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                            },50);
+                        } else {
+                            playButton.setVisibility(View.VISIBLE);
+                        }
                         break;
                     case MotionEvent.ACTION_CANCEL:
                         break;
                     case MotionEvent.ACTION_MOVE:
+                        points.add((int)event.getY());
+                        if (points.size() > 1 && flagForAnimation == false) {
+                            if (Math.abs(points.get(points.size() - 1) - points.get(0)) > 2){
+                                flagForAnimation = true;
+                            }
+                        }
+                        break;
 
                 }
                 return false;
@@ -264,6 +300,8 @@ public class PortrateActivity extends AppCompatActivity {
         seekbar.setProgress(textSize -min);
         speedControlSeekBar.setMax(max2 - min2);
         speedControlSeekBar.setProgress(speedControlSize - min2);
+        timeSeekBar.setMax(max3 - min3);
+        timeSeekBar.setProgress(timeControl - min3);
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,
@@ -289,6 +327,22 @@ public class PortrateActivity extends AppCompatActivity {
                                           boolean fromUser) {
                 speedControlSize = min2 + progress;
                 speedControlText.setText("Speed: "+speedControlSize + "sec");
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        timeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+                timeControl = min3 + progress;
+                timeControlText.setText("Time Control: "+timeControl + "sec");
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -371,6 +425,7 @@ public class PortrateActivity extends AppCompatActivity {
 
             case KeyEvent.KEYCODE_VOLUME_UP:
                 if (action == KeyEvent.ACTION_DOWN) {
+                    onAnimationStarted = false;
                     Log.i("VOL_UP_pressed", String.valueOf(event.getKeyCode()));
                     if(recordBtn.getText().toString().trim().equalsIgnoreCase("stop")) {
                         toGoToNext = true;
@@ -384,6 +439,7 @@ public class PortrateActivity extends AppCompatActivity {
 
             case KeyEvent.KEYCODE_ENTER:
                 if(action==KeyEvent.ACTION_DOWN){
+                    onAnimationStarted = false;
                     Log.i("ENTER_pressed", String.valueOf(event.getKeyCode()));
                     if(recordBtn.getText().toString().trim().equalsIgnoreCase("stop")) {
                         toGoToNext = true;
@@ -497,7 +553,7 @@ public class PortrateActivity extends AppCompatActivity {
             if (adapter != null){
                 adapter.refreshAdapter(items);
             }
-            scaleAnimation(5);
+            scaleAnimation(timeControl);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -545,6 +601,7 @@ public class PortrateActivity extends AppCompatActivity {
         }
         try{
             if (recordBtn.getText().equals(getString(R.string.app_record))) {
+                onAnimationStarted = true;
                 list.smoothScrollToPositionFromTop(1,0, speedControlSize * 1000);
                 filepath = getVideoFilePath(lessonNo,fileName);
                 cameraRecorder.start(filepath);

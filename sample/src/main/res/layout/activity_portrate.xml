@@ -153,6 +153,25 @@
         android:minHeight="6dp"
         android:layout_below="@+id/speedControlText"
         android:id="@+id/speedSeekBar"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Time Control: 5sec"
+            android:textSize="20sp"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:textColor="#ffffff"
+            android:layout_below="@id/speedSeekBar"
+            android:id="@+id/timeControlText"/>
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="32dp"
+            android:layout_marginLeft="32dp"
+            android:minHeight="6dp"
+            android:layout_below="@+id/timeControlText"
+            android:id="@+id/timeSeekBar"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -162,7 +181,7 @@
             android:textColor="#ffffff"
             android:gravity="center_horizontal"
             android:layout_marginTop="16dp"
-            android:layout_below="@id/speedSeekBar"
+            android:layout_below="@id/timeSeekBar"
             />
         <TextView
             android:layout_width="match_parent"

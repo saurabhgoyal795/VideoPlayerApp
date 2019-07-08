@@ -17,4 +17,10 @@
         android:orderInCategory="100"
         android:title="Change Speed"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/changeTimer"
+        android:orderInCategory="100"
+        android:title="Change Timer"
+        app:showAsAction="never" />
+
 </menu>
