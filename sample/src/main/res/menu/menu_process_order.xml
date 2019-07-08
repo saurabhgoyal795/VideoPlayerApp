@@ -11,4 +11,10 @@
         android:orderInCategory="100"
         android:title="Swith to sheet"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/changeSpeed"
+        android:orderInCategory="100"
+        android:title="Change Speed"
+        app:showAsAction="never" />
 </menu>

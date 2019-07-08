@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -103,10 +104,11 @@ public class PortrateActivity extends AppCompatActivity {
     int max = 60;
     int min = 20;
     int textSize = 32;
-    int speedControlSize = 10;
-    int max2 = 30;
+    int speedControlSize = 15;
+    int max2 = 50;
     int min2 = 5;
     boolean toGoToNext = false;
+    SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +142,10 @@ public class PortrateActivity extends AppCompatActivity {
         fileNameTextView = findViewById(R.id.fileName);
         timerCounter = findViewById(R.id.timerCounter);
         fileNameTextView.setText(fileName);
+        prefs = this.getSharedPreferences(
+                "com.daasuu.sample", Context.MODE_PRIVATE);
+        speedControlSize = prefs.getInt("speedControl", 15);
+        speedControlText.setText("Speed: "+speedControlSize + "sec");
 
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,9 +161,9 @@ public class PortrateActivity extends AppCompatActivity {
                     toGoToNext = true;
                     cameraRecorder.stop();
                 } else {
+                    position = position + 1;
                     goToNextQuestion();
                 }
-
             }
         });
         findViewById(R.id.btn_flash).setOnClickListener(v -> {
@@ -215,24 +221,14 @@ public class PortrateActivity extends AppCompatActivity {
             if (CommonUtility.isActivityDestroyed(PortrateActivity.this)) {
                 return;
             }
-            try{
-                if (recordBtn.getText().equals(getString(R.string.app_record))) {
-                    list.smoothScrollToPositionFromTop(1,0, speedControlSize * 1000);
-                    filepath = getVideoFilePath(lessonNo,fileName);
-                    cameraRecorder.start(filepath);
-                    recordBtn.setText("Stop");
-                } else {
-                    toGoToNext = false;
-                    recordBtn.setText(getString(R.string.app_record));
-                    cameraRecorder.stop();
-                }
-            } catch ( Exception e){
-
+            if (recordBtn.getText().equals(getString(R.string.app_record))) {
+                scaleAnimation(5);
+            } else {
+                toGoToNext = false;
+                recordBtn.setText(getString(R.string.app_record));
+                cameraRecorder.stop();
             }
-
-
         });
-
 
         ArrayList<String> items = new ArrayList<>();
         items.add(data);
@@ -374,14 +370,26 @@ public class PortrateActivity extends AppCompatActivity {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 if (action == KeyEvent.ACTION_DOWN) {
                     Log.i("VOL_UP_pressed", String.valueOf(event.getKeyCode()));
-                    goToNextQuestion();
+                    if(recordBtn.getText().toString().trim().equalsIgnoreCase("stop")) {
+                        toGoToNext = true;
+                        cameraRecorder.stop();
+                    } else {
+                        position = position + 1;
+                        goToNextQuestion();
+                    }
                 }
                 return true;
 
             case KeyEvent.KEYCODE_ENTER:
                 if(action==KeyEvent.ACTION_DOWN){
                     Log.i("ENTER_pressed", String.valueOf(event.getKeyCode()));
-                    goToNextQuestion();
+                    if(recordBtn.getText().toString().trim().equalsIgnoreCase("stop")) {
+                        toGoToNext = true;
+                        cameraRecorder.stop();
+                    } else {
+                        position = position + 1;
+                        goToNextQuestion();
+                    }
                 }
             default:
                 return super.dispatchKeyEvent(event);
@@ -440,6 +448,7 @@ public class PortrateActivity extends AppCompatActivity {
                     public void onRecordComplete() {
                         exportMp4ToGallery(getApplicationContext(), filepath);
                         if (toGoToNext == true) {
+                            position = position + 1;
                             goToNextQuestion();
                         }
 
@@ -475,7 +484,6 @@ public class PortrateActivity extends AppCompatActivity {
 
     void goToNextQuestion() {
         try {
-            position = position + 1;
             jsonObj = jsonArray.getJSONObject(position);
             fileName = jsonObj.getString("filename");
             data = jsonObj.getString("data");
@@ -488,13 +496,6 @@ public class PortrateActivity extends AppCompatActivity {
                 adapter.refreshAdapter(items);
             }
             scaleAnimation(5);
-            new Handler().postDelayed(new Runnable() {
-                public void run() {
-                }
-            }, 5000);
-
-
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -524,7 +525,7 @@ public class PortrateActivity extends AppCompatActivity {
                 if (temp[0] < 1){
                     timerCounter.setVisibility(View.GONE);
                     timerCounter.clearAnimation();
-                    recordBtn.performClick();
+                    recordButtonClick();
                 } else {
                     scaleAnimation(temp[0]);
                 }
@@ -534,6 +535,24 @@ public class PortrateActivity extends AppCompatActivity {
             public void onAnimationRepeat(Animation animation) {
             }
         });
+    }
+
+    private void recordButtonClick() {
+        if (CommonUtility.isActivityDestroyed(PortrateActivity.this)) {
+            return;
+        }
+        try{
+            if (recordBtn.getText().equals(getString(R.string.app_record))) {
+                list.smoothScrollToPositionFromTop(1,0, speedControlSize * 1000);
+                filepath = getVideoFilePath(lessonNo,fileName);
+                cameraRecorder.start(filepath);
+                recordBtn.setText("Stop");
+            } else {
+                recordBtn.setText(getString(R.string.app_record));
+                cameraRecorder.stop();
+            }
+        } catch ( Exception e){
+        }
     }
 
     private void changeFilter(Filters filters) {

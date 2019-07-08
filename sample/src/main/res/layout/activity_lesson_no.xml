@@ -39,6 +39,26 @@
             android:id="@+id/submit"
             android:text="Ok"/>
     </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:id="@+id/speedLayout"
+        android:layout_height="wrap_content">
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:padding="16dp"
+            android:hint="Enter Speed"
+            android:id="@+id/changeSpeedEditText"
+            android:layout_height="wrap_content" />
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/submitSpeed"
+            android:text="Ok"/>
+    </LinearLayout>
+
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/my_recycler_view"

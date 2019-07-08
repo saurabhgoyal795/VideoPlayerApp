@@ -265,6 +265,8 @@ public class CameraThread extends Thread {
                 Log.v(TAG, "stopPreview: cameraDevice.close()");
             } catch (CameraAccessException e) {
                 e.printStackTrace();
+            } catch (Throwable e) {
+                e.printStackTrace();
             }
         }
     }

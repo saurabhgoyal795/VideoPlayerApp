@@ -65,6 +65,7 @@ public class LessonNoActivity extends AppCompatActivity {
     ProgressBar progressBar1;
     String lessonName;
     EditText lessonNoEditText;
+    EditText changeSpeedEditText;
     TextView lessonTextView;
     JSONObject appStringObject;
     boolean isFromSheet = false;
@@ -86,13 +87,33 @@ public class LessonNoActivity extends AppCompatActivity {
         lessonTextView = findViewById(R.id.lessonno);
         lessonTextView.setText("Lesson No : "+lessonNo);
         lessonNoEditText = findViewById(R.id.lessonNoEditText);
-
+        changeSpeedEditText = findViewById(R.id.changeSpeedEditText);
         lessonNameTextView = findViewById(R.id.lessonname);
+        prefs = this.getSharedPreferences(
+                "com.daasuu.sample", Context.MODE_PRIVATE);
+
+        if (prefs.getBoolean("googleSheet", false) == false){
+            isFromSheet = false;
+        } else {
+            isFromSheet = true;
+
+        }
         findViewById(R.id.submit).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                lessonNo=Integer.parseInt(lessonNoEditText.getText().toString().trim());
                 getList();
+            }
+        });
+        findViewById(R.id.submitSpeed).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (changeSpeedEditText.getText().toString().trim() != ""){
+                    prefs.edit().putInt("speedControl", Integer.parseInt(changeSpeedEditText.getText().toString().trim())).commit();
+                    Toast.makeText(LessonNoActivity.this, "Speed Updated Successfully",Toast.LENGTH_SHORT).show();
+                    findViewById(R.id.speedLayout).setVisibility(View.GONE);
+                }
+
             }
         });
         mRecyclerView = findViewById(R.id.my_recycler_view);
@@ -103,15 +124,7 @@ public class LessonNoActivity extends AppCompatActivity {
         mLayoutManager = new GridLayoutManager(getApplicationContext(),1);
         mRecyclerView.setLayoutManager(mLayoutManager);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(event, new IntentFilter(LESSON_LIST_REFRESH));
-        prefs = this.getSharedPreferences(
-                "com.daasuu.sample", Context.MODE_PRIVATE);
 
-        if (prefs.getBoolean("googleSheet", false) == false){
-            isFromSheet = false;
-        } else {
-            isFromSheet = true;
-
-        }
         getList();
 
         if (ContextCompat.checkSelfPermission(getApplicationContext(),
@@ -210,6 +223,9 @@ public class LessonNoActivity extends AppCompatActivity {
             case R.id.action_settings:
                 findViewById(R.id.lessonLayout).setVisibility(View.VISIBLE);
                 return true;
+            case R.id.changeSpeed:
+                findViewById(R.id.speedLayout).setVisibility(View.VISIBLE);
+                return true;
             case R.id.google_sheet:
                 if (item.getTitle().toString().trim().equalsIgnoreCase("Switch to sheet")) {
                     isFromSheet = true;
@@ -271,9 +287,9 @@ public class LessonNoActivity extends AppCompatActivity {
                     for (int i = 0; i<dataArray.length();i++){
                         JSONObject obj = dataArray.getJSONObject(i);
                         if(obj.has("file_name")){
-                            obj.put("filename", obj.getString("file_name").replaceAll(".mp3", "")+ ".mp4");
-                        }else {
-                            obj.put("filename", obj.getString("filename").replaceAll(".mp3", "")+ ".mp4");
+                            obj.put("filename", obj.getString("file_name").replaceAll(".mp3", "").replaceAll(".mp4","")+ ".mp4");
+                        } else {
+                            obj.put("filename", obj.getString("filename").replaceAll(".mp3", "").replaceAll(".mp4","")+ ".mp4");
                         }
                         String filename = obj.getString("filename");
                         String filePath = BaseCameraActivity.getVideoFilePath(lessonNo,filename);
