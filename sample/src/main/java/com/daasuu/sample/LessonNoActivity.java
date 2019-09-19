@@ -267,7 +267,7 @@ public class LessonNoActivity extends AppCompatActivity {
             adapter = new LessonListItemAdataper(list,R.layout.lessonlistitem,LessonNoActivity.this,lessonNo);
             mRecyclerView.setAdapter(adapter);
         }else{
-            adapter.refreshAdapter(list);
+            adapter.refreshAdapter(list,lessonNo);
         }
     }
 
@@ -463,8 +463,9 @@ public class LessonNoActivity extends AppCompatActivity {
             return currentPosition;
         }
 
-        public void refreshAdapter(ArrayList<JSONObject> items) {
+        public void refreshAdapter(ArrayList<JSONObject> items, int lesssonNo) {
             this.items = items;
+            this.lesssonNo = lesssonNo;
             notifyDataSetChanged();
         }
 

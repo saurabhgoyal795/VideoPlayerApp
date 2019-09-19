@@ -123,6 +123,7 @@ public class CameraThread extends Thread {
     private void updatePreview() {
 
         requestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO);
+//        requestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_STATE_FOCUSED_LOCKED);
 
         HandlerThread thread = new HandlerThread("CameraPreview");
         thread.start();
@@ -130,6 +131,8 @@ public class CameraThread extends Thread {
 
         try {
             cameraCaptureSession.setRepeatingRequest(requestBuilder.build(), null, backgroundHandler);
+//            cameraCaptureSession.setRepeatingRequest(requestBuilder.build(), null, null);
+
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }

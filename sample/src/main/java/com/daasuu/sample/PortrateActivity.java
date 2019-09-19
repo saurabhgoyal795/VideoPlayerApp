@@ -222,14 +222,14 @@ public class PortrateActivity extends AppCompatActivity {
             }
 
         });
-//        videoWidth = 1080;
-//        videoHeight = 1980;
-//        cameraWidth = 1280;
-//        cameraHeight = 720;
-        videoWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
-        videoHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
-        cameraWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
-        cameraHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
+        videoWidth = 1080;
+        videoHeight = 1980;
+        cameraWidth = 1280;
+        cameraHeight = 720;
+//        videoWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+//        videoHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
+//        cameraWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
+//        cameraHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
         recordBtn.setOnClickListener(v -> {
             if (CommonUtility.isActivityDestroyed(PortrateActivity.this)) {
                 return;
@@ -415,44 +415,44 @@ public class PortrateActivity extends AppCompatActivity {
     }
 
 
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        int action = event.getAction();
-        int keyCode = event.getKeyCode();
-        Log.d("keycode", "keycode"+ keyCode);
-
-        switch (keyCode) {
-
-            case KeyEvent.KEYCODE_VOLUME_UP:
-                if (action == KeyEvent.ACTION_DOWN) {
-                    onAnimationStarted = false;
-                    Log.i("VOL_UP_pressed", String.valueOf(event.getKeyCode()));
-                    if(recordBtn.getText().toString().trim().equalsIgnoreCase("stop")) {
-                        toGoToNext = true;
-                        cameraRecorder.stop();
-                    } else {
-                        position = position + 1;
-                        goToNextQuestion();
-                    }
-                }
-                return true;
-
-            case KeyEvent.KEYCODE_ENTER:
-                if(action==KeyEvent.ACTION_DOWN){
-                    onAnimationStarted = false;
-                    Log.i("ENTER_pressed", String.valueOf(event.getKeyCode()));
-                    if(recordBtn.getText().toString().trim().equalsIgnoreCase("stop")) {
-                        toGoToNext = true;
-                        cameraRecorder.stop();
-                    } else {
-                        position = position + 1;
-                        goToNextQuestion();
-                    }
-                }
-            default:
-                return super.dispatchKeyEvent(event);
-        }
-    }
+//    @Override
+//    public boolean dispatchKeyEvent(KeyEvent event) {
+//        int action = event.getAction();
+//        int keyCode = event.getKeyCode();
+//        Log.d("keycode", "keycode"+ keyCode);
+//
+//        switch (keyCode) {
+//
+//            case KeyEvent.KEYCODE_VOLUME_UP:
+//                if (action == KeyEvent.ACTION_DOWN) {
+//                    onAnimationStarted = false;
+//                    Log.i("VOL_UP_pressed", String.valueOf(event.getKeyCode()));
+//                    if(recordBtn.getText().toString().trim().equalsIgnoreCase("stop")) {
+//                        toGoToNext = true;
+//                        cameraRecorder.stop();
+//                    } else {
+//                        position = position + 1;
+//                        goToNextQuestion();
+//                    }
+//                }
+//                return true;
+//
+//            case KeyEvent.KEYCODE_ENTER:
+//                if(action==KeyEvent.ACTION_DOWN){
+//                    onAnimationStarted = false;
+//                    Log.i("ENTER_pressed", String.valueOf(event.getKeyCode()));
+//                    if(recordBtn.getText().toString().trim().equalsIgnoreCase("stop")) {
+//                        toGoToNext = true;
+//                        cameraRecorder.stop();
+//                    } else {
+//                        position = position + 1;
+//                        goToNextQuestion();
+//                    }
+//                }
+//            default:
+//                return super.dispatchKeyEvent(event);
+//        }
+//    }
 
 
 

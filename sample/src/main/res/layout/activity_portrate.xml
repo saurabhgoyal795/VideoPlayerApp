@@ -17,7 +17,7 @@
         android:id="@+id/datalist"
         android:layout_alignParentTop="true"
         android:background="@color/colorBlack50"
-        android:layout_height="400dp">
+        android:layout_height="300dp">
         <ListView
             android:id="@+id/list"
             android:layout_width="match_parent"
